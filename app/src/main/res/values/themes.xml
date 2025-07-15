@@ -1,0 +1,62 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.HorseRacing" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">@color/main_color_gray_bb</item>
+    </style>
+
+    <style name="Theme.HorseRacing" parent="Base.Theme.HorseRacing" >
+        <item name="toolbarStyle">@style/Theme.HorseRacing.Toolbar</item>
+        <item name="android:statusBarColor">@color/main_color_gray_bb</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Theme.HorseRacing.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="navigationIcon">@null</item>
+        <item name="android:gravity">start</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="titleTextAppearance">@style/Headline_3_1</item>
+
+        <!--два атрибута ниже выставлены, чтобы уменьшить расстояние
+        между иконкой навигации и тулбаром -->
+        <item name="contentInsetStartWithNavigation">0dp</item>
+        <item name="titleMarginStart">0dp</item>
+    </style>
+
+    <!--  Widget Style -->
+    <style name="Widget" />
+    <style name="Widget.HorseRacing.TabLayout" parent="Widget.MaterialComponents.TabLayout">
+        <!-- Убираем стандартный индикатор -->
+        <item name="tabIndicatorHeight">0dp</item>
+        <!-- Задаём наш фон для каждого таба -->
+        <item name="tabBackground">@drawable/tab_background_selector</item>
+        <!-- Убираем ripple‑эффект, чтобы не было лишних артефактов -->
+        <item name="tabRippleColor">@null</item>
+        <!-- По желанию — подправим внутренние отступы -->
+        <item name="tabPaddingStart">16dp</item>
+        <item name="tabPaddingEnd">16dp</item>
+    </style>
+
+    <style name="Widget.Tab">
+        <item name="fontFamily">@font/commissioner_700</item>
+        <item name="android:textSize">12sp</item>
+        <item name="lineHeight">16sp</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+    <style name="Widget.Button" parent="@style/Widget.Material3.Button">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay12</item>
+        <item name="android:textAppearance">@style/Button_1</item>
+        <item name="elevation">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="background">?selectableItemBackground</item>
+    </style>
+
+    <style name="Widget.Button.GrayButton" parent="Widget.Button">
+        <item name="backgroundTint">@color/gray_button_bg_state</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+</resources>
