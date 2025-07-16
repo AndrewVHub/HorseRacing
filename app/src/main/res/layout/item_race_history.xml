@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/backgroundCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_box_12"
+    android:backgroundTint="@color/yellow_pastel"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/raceResultInfo"
+        style="@style/Headline_1"
+        android:layout_width="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="В процессе" />
+
+    <ImageView
+        android:id="@+id/crownImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_crown"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/raceResultInfo"
+        app:layout_constraintTop_toTopOf="@id/raceResultInfo"
+        app:layout_constraintBottom_toBottomOf="@id/raceResultInfo"
+        android:layout_marginStart="@dimen/spacing_medium"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/horseNames"
+        style="@style/Subtitle_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/raceResultInfo"
+        tools:text="Камри 3.5 - Чанган" />
+
+    <TextView
+        android:id="@+id/time"
+        style="@style/Subtitle_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/horseNames"
+        tools:text="Время начала: 02:29:55" />
+
+    <TextView
+        android:id="@+id/distance"
+        style="@style/Subtitle_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/time"
+        tools:text="Расстояние: 8.12км" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

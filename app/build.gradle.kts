@@ -11,6 +11,7 @@ android {
     compileSdk = 35
 
     viewBinding.enable = true
+    buildFeatures.buildConfig = true
 
     defaultConfig {
         applicationId = "ru.andrewvhub.horseracing"
@@ -88,4 +89,8 @@ dependencies {
 
     //Gson
     implementation(libs.gson)
+
+    //Room
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }

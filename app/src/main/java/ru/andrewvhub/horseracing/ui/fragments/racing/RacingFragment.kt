@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.Toast
@@ -15,7 +14,7 @@ import ru.andrewvhub.horseracing.R
 import ru.andrewvhub.horseracing.core.BaseFragment
 import ru.andrewvhub.horseracing.databinding.FragmentRacingBinding
 import ru.andrewvhub.horseracing.ui.viewBinding.viewBinding
-import ru.andrewvhub.utils.extensions.addSystemBottomSpace
+import timber.log.Timber
 
 class RacingFragment : BaseFragment(R.layout.fragment_racing) {
 
@@ -24,27 +23,19 @@ class RacingFragment : BaseFragment(R.layout.fragment_racing) {
 
     private var currentRaceAnimatorSet: AnimatorSet? = null
 
-    private val rightEdgePaddingPx = 100f
-    private var finishLineX: Float = 0f
-    private var horseInitialX: Float = 0f
-
+    private val finishLineX: Float by lazy {
+        resources.displayMetrics.widthPixels.toFloat()
+    }
 
     private val horseViews: Map<String, LottieAnimationView> by lazy {
         mapOf(
-            viewModel.horseName1 to viewBinding.horse1,
-            viewModel.horseName2 to viewBinding.horse2
+            viewModel.horseNames[0] to viewBinding.horse1,
+            viewModel.horseNames[1] to viewBinding.horse2
         )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(viewBinding) {
         super.onViewCreated(view, savedInstanceState)
-
-        buttons.addSystemBottomSpace(false)
-
-        horseInitialX = viewBinding.horse1.x
-        val screenWidth = resources.displayMetrics.widthPixels.toFloat()
-        val horseWidth = viewBinding.horse1.width.toFloat()
-        finishLineX = screenWidth - rightEdgePaddingPx - horseWidth
 
         setupListeners()
         setupObservers()
@@ -55,26 +46,26 @@ class RacingFragment : BaseFragment(R.layout.fragment_racing) {
         restartButton.setOnClickListener { viewModel.resetRace() }
     }
 
-    private fun setupObservers() {
+    private fun setupObservers(): Unit = with(viewBinding) {
         viewModel.uiEvents.observe(viewLifecycleOwner) { event ->
             when (event) {
-                is RacingViewModel.UIRacingEvent.StartAnimations -> {
+                is RacingViewModel.UIEvent.Start -> {
                     startRaceAnimations(event.durations)
-                    viewBinding.startButton.isEnabled = false
-                    viewBinding.restartButton.isEnabled = false
-                    viewBinding.winnerTextView.text =
+                    startButton.isEnabled = false
+                    restartButton.isEnabled = false
+                    winnerTextView.text =
                         getString(R.string.racing_fragment_status_start_text)
-                    Log.d("OS4:Race", "Гонка началась")
+                    Timber.tag("OS4:RacingFragment").d("Гонка началась")
                 }
 
-                is RacingViewModel.UIRacingEvent.HorseFinished -> {
-                    Log.d("OS4:Race", "Финиш: ${event.horseName}")
+                is RacingViewModel.UIEvent.HorseFinished -> {
+                    Timber.tag("OS4:RacingFragment").d("Финиш: ${event.name}")
                 }
 
-                is RacingViewModel.UIRacingEvent.RaceEnded -> {
-                    viewBinding.winnerTextView.text =
-                        getString(R.string.racing_fragment_status_winner_text, event.winnerName)
-                    viewBinding.restartButton.isEnabled = true
+                is RacingViewModel.UIEvent.Finish -> {
+                    winnerTextView.text =
+                        getString(R.string.racing_fragment_status_winner_text, event.winner)
+                    restartButton.isEnabled = true
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.race_status_finished),
@@ -82,24 +73,22 @@ class RacingFragment : BaseFragment(R.layout.fragment_racing) {
                     ).show()
                 }
 
-                RacingViewModel.UIRacingEvent.ResetUI -> {
-                    resetUI()
-                }
+                RacingViewModel.UIEvent.Reset -> { resetUI() }
             }
         }
 
         viewModel.raceState.observe(viewLifecycleOwner) { event ->
             when (event) {
                 RacingViewModel.RaceState.Idle -> {
-                    Log.d("OS4:Race", "IDLE state")
+                    Timber.tag("OS4:RacingFragment").d("IDLE state")
                 }
 
                 RacingViewModel.RaceState.Running -> {
-                    Log.d("OS4:Race", "RUNNING state")
+                    Timber.tag("OS4:RacingFragment").d("RUNNING state")
                 }
 
                 RacingViewModel.RaceState.Finished -> {
-                    Log.d("OS4:Race", "FINISHED state")
+                    Timber.tag("OS4:RacingFragment").d("FINISHED state")
                 }
             }
         }
@@ -118,7 +107,7 @@ class RacingFragment : BaseFragment(R.layout.fragment_racing) {
                 animator.addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         view.pauseAnimation()
-                        Log.d("OS4:RaceFragment", "Лошадь $name финишировала на экране.")
+                        Timber.tag("OS4:RacingFragment").d("Лошадь $name финишировала на экране.")
                     }
                 })
             }

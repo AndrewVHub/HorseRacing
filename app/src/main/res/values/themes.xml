@@ -16,26 +16,12 @@
         <item name="titleTextColor">@color/white</item>
         <item name="android:background">@color/transparent</item>
         <item name="titleTextAppearance">@style/Headline_3_1</item>
-
-        <!--два атрибута ниже выставлены, чтобы уменьшить расстояние
-        между иконкой навигации и тулбаром -->
         <item name="contentInsetStartWithNavigation">0dp</item>
         <item name="titleMarginStart">0dp</item>
     </style>
 
     <!--  Widget Style -->
     <style name="Widget" />
-    <style name="Widget.HorseRacing.TabLayout" parent="Widget.MaterialComponents.TabLayout">
-        <!-- Убираем стандартный индикатор -->
-        <item name="tabIndicatorHeight">0dp</item>
-        <!-- Задаём наш фон для каждого таба -->
-        <item name="tabBackground">@drawable/tab_background_selector</item>
-        <!-- Убираем ripple‑эффект, чтобы не было лишних артефактов -->
-        <item name="tabRippleColor">@null</item>
-        <!-- По желанию — подправим внутренние отступы -->
-        <item name="tabPaddingStart">16dp</item>
-        <item name="tabPaddingEnd">16dp</item>
-    </style>
 
     <style name="Widget.Tab">
         <item name="fontFamily">@font/commissioner_700</item>

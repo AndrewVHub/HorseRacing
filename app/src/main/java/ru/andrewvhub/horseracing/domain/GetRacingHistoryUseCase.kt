@@ -1,3 +1,0 @@
-package ru.andrewvhub.horseracing.domain
-
-class GetRacingHistoryUseCase
