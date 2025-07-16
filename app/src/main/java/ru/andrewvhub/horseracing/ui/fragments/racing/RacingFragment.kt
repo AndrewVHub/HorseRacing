@@ -34,7 +34,7 @@ class RacingFragment : BaseFragment(R.layout.fragment_racing) {
         )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(viewBinding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupListeners()
