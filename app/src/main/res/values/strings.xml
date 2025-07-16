@@ -1,10 +1,6 @@
 <resources>
     <string name="app_name">Horse Racing</string>
 
-    <string name="common_error">Ошибка</string>
-
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="horse_name_1">Чанган</string>
     <string name="horse_name_2">Камри 3.5</string>
 
@@ -13,9 +9,16 @@
     <string name="race_status_unknown">Статус неизвестен</string>
 
     <string name="tabs_fragment_title">Потом, если что, депну</string>
+    <string name="tabs_fragment_tab_history">История</string>
+    <string name="tabs_fragment_tab_race">Гонки</string>
 
     <string name="racing_fragment_status_winner_text">Победитель: %s</string>
     <string name="racing_fragment_status_start_text">Гонка началась!</string>
-    <string name="racing_fragment_status_waiting_start_text">Ожидание гонки...</string>
+    <string name="racing_fragment_status_waiting_start_text">Ожидание гонки…</string>
+    <string name="racing_fragment_start_text">Старт</string>
+    <string name="racing_fragment_restart_text">Рестарт</string>
 
+    <string name="item_history_distance">Расстояние: %.2f км</string>
+    <string name="item_history_start_time">Время начала: %s</string>
+    <string name="item_history_horses">%1s vs %2s</string>
 </resources>

@@ -1,6 +1,5 @@
 package ru.andrewvhub.horseracing.ui.fragments.racing
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -11,86 +10,119 @@ import ru.andrewvhub.horseracing.R
 import ru.andrewvhub.horseracing.core.BaseViewModel
 import ru.andrewvhub.horseracing.data.model.RaceResult
 import ru.andrewvhub.horseracing.data.model.RaceStatus
+import ru.andrewvhub.horseracing.domain.useCase.CheckAndFixStuckRacesUseCase
+import ru.andrewvhub.horseracing.domain.useCase.SaveRaceUseCase
+import ru.andrewvhub.horseracing.domain.useCase.UpdateRaceUseCase
 import kotlin.random.Random
 
-class RacingViewModel: BaseViewModel() {
+class RacingViewModel(
+    private val updateRaceUseCase: UpdateRaceUseCase,
+    private val saveRaceUseCase: SaveRaceUseCase,
+    private val checkAndFixStuckRacesUseCase: CheckAndFixStuckRacesUseCase
+) : BaseViewModel() {
 
-    // LiveData для отслеживания состояния гонки
-    private val _raceState = MutableLiveData<RaceState>()
+    // Состояние гонки
+    private val _raceState = MutableLiveData<RaceState>(RaceState.Idle)
     val raceState: LiveData<RaceState> = _raceState
 
-    // LiveData для событий UI, которые должны произойти во фрагменте
-    private val _uiEvents = MutableLiveData<UIRacingEvent>()
-    val uiEvents: LiveData<UIRacingEvent> = _uiEvents
+    // События UI
+    private val _uiEvents = MutableLiveData<UIEvent>()
+    val uiEvents: LiveData<UIEvent> = _uiEvents
 
-    // Job для таймера гонки
     private var raceTimerJob: Job? = null
+    private var raceStartTime: Long = 0L
+    private var raceDistance: Double = 0.00
 
-    // Список для хранения результатов гонок (для БД или истории)
-    private val _raceHistory = MutableLiveData<List<RaceResult>>(listOf())
-    val raceHistory: LiveData<List<RaceResult>> = _raceHistory
+    //Вообще мысля есть убрать это поле, и при обновлении делать запрос к БД по primaryKey
+    //Затем обновить только нужные поля
+    private var currentRaceResult: RaceResult? = null
 
-    val horseName1 = resources.getString(R.string.horse_name_1)
-    val horseName2 = resources.getString(R.string.horse_name_2)
+    val horseNames = listOf(
+        resources.getString(R.string.horse_name_1),
+        resources.getString(R.string.horse_name_2)
+    )
 
     init {
-        _raceState.value = RaceState.Idle // Начальное состояние
+        viewModelScope.launch {
+            checkAndFixStuckRacesUseCase(Unit)
+        }
     }
 
+    /** Запуск гонки */
     fun startRace() {
-        // защита от повторного старта
-        if (_raceState.value != RaceState.Idle) {
-            Log.d("OS4:RaceViewModel", "Гонка уже идет или в процессе сброса.")
-            return
-        }
+        if (_raceState.value != RaceState.Idle) return
 
-        _raceState.value = RaceState.Running
+        raceStartTime = System.currentTimeMillis().also { _raceState.value = RaceState.Running }
+        raceDistance = Random.nextInt(500, 1500) / 100.0
+        val durations = horseNames.associateWith { Random.nextLong(5_000, 7_001) }
+        _uiEvents.value = UIEvent.Start(durations)
 
-        // 1) Генерим длительности для всех лошадей
-        val horseNames = listOf(horseName1, horseName2)
-        val durations: Map<String, Long> = horseNames.associateWith { Random.nextLong(5_000, 7_001) }
-        _uiEvents.value = UIRacingEvent.StartAnimations(durations)
-
-        // 2) Сортируем по времени, чтобы получить порядок финиша
-        val sortedResults = durations
-            .entries
-            .sortedBy { it.value }      // сначала победитель, потом аутсайдер
-        val finishedOrder = sortedResults.map { it.key }
-        val winner = finishedOrder.first()
-
-        // 3) Запускаем корутину для отправки событий «финиша» с нужными задержками
-        raceTimerJob?.cancel()
-        raceTimerJob = viewModelScope.launch {
-            var elapsed = 0L
-            for ((name, time) in sortedResults) {
-                // ждём ровно столько, сколько осталось до финиша этой лошади
-                delay(time - elapsed)
-                elapsed = time
-                _uiEvents.postValue(UIRacingEvent.HorseFinished(name))
-            }
-
-            // 4) После того, как обе лошади «финишировали», обновляем историю и состояние
-            val result = RaceResult(
-                timestamp = System.currentTimeMillis(),
-                winner = winner,
-                firstHorseTimeMs = sortedResults[0].value,
-                secondHorseTimeMs = sortedResults[1].value,
-                status = RaceStatus.FINISHED
-            )
-
-            val updatedHistory = listOf(result) + (_raceHistory.value.orEmpty())
-            _raceHistory.postValue(updatedHistory)
-
-            _raceState.postValue(RaceState.Finished)
-            _uiEvents.postValue(UIRacingEvent.RaceEnded(winner))
-        }
+        // Сохраняем факт старта с базовым результатом
+        currentRaceResult = RaceResult(
+            timestamp = raceStartTime,
+            winner = "",
+            firstHorseName = horseNames[0],
+            secondHorseName = horseNames[1],
+            firstHorseTimeMs = 0L,
+            secondHorseTimeMs = 0L,
+            status = RaceStatus.RUNNING,
+            distance = raceDistance
+        )
+        saveResult(currentRaceResult)
+        launchRace(durations)
     }
 
+    /** Сброс гонки */
     fun resetRace() {
         raceTimerJob?.cancel()
         _raceState.value = RaceState.Idle
-        _uiEvents.value = UIRacingEvent.ResetUI
-        Log.d("OS4:RaceViewModel", "Гонка сброшена.")
+        _uiEvents.value = UIEvent.Reset
+    }
+
+    private fun launchRace(
+        durations: Map<String, Long>,
+        offset: Long = 0L
+    ) {
+        val sorted = durations.entries.sortedBy { it.value }
+        val winner = sorted.first().key
+
+        raceTimerJob = viewModelScope.launch {
+            var elapsed = offset
+            sorted.forEach { (name, fullTime) ->
+                val wait = fullTime - elapsed
+                if (wait > 0) {
+                    delay(wait)
+                    elapsed = fullTime
+                }
+                _uiEvents.postValue(UIEvent.HorseFinished(name))
+            }
+
+            val (first, second) = sorted
+
+            val updatedRace = currentRaceResult?.copy(
+                winner = winner,
+                firstHorseTimeMs = first.value,
+                secondHorseTimeMs = second.value,
+                status = RaceStatus.FINISHED,
+            )
+
+            updatedRace?.let { updateRaceUseCase(it) }
+            _raceState.postValue(RaceState.Finished)
+            _uiEvents.postValue(UIEvent.Finish(winner))
+        }
+    }
+
+    private fun saveResult(result: RaceResult?) {
+        result?.let {
+            viewModelScope.launch {
+                saveRaceUseCase(result)
+            }
+        }
+    }
+
+    override fun onCleared() {
+        raceTimerJob?.cancel()
+        super.onCleared()
     }
 
     // Состояния гонки
@@ -100,18 +132,11 @@ class RacingViewModel: BaseViewModel() {
         data object Finished : RaceState()
     }
 
-    // События для UI, которые ViewModel отправляет во фрагмент
-    sealed class UIRacingEvent {
-        data class StartAnimations(val durations: Map<String, Long>) : UIRacingEvent()
-        data class HorseFinished(val horseName: String) : UIRacingEvent()
-        data class RaceEnded(val winnerName: String) : UIRacingEvent()
-        data object ResetUI : UIRacingEvent()
-    }
-
-    // Для очистки ресурсов, когда ViewModel больше не нужна
-    override fun onCleared() {
-        super.onCleared()
-        raceTimerJob?.cancel()
-        Log.d("OS4:RaceViewModel", "ViewModel очищена.")
+    // События для UI
+    sealed class UIEvent {
+        data class Start(val durations: Map<String, Long>) : UIEvent()
+        data class HorseFinished(val name: String) : UIEvent()
+        data class Finish(val winner: String) : UIEvent()
+        data object Reset : UIEvent()
     }
 }

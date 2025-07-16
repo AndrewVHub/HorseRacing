@@ -20,13 +20,13 @@ abstract class BaseViewModel : ViewModel(), KoinComponent {
     private val _mainNavigate = SingleLiveEvent<NavDirections>()
     val mainNavigate: LiveData<NavDirections> = _mainNavigate
 
-//    fun Throwable.handleThrowable() = resources.getMessageFromThrowable(this)
-
+    //Не стал убирать, может пригодится
     fun mainNavigate(destination: NavDirections) {
         _mainNavigate.value = destination
     }
 }
 
+//Тоже убирать не буду, покажу, что вот такое писал
 fun ViewModel.launchSafe(
     body: suspend () -> Unit,
     onError: ((error: Throwable) -> Unit)? = null,

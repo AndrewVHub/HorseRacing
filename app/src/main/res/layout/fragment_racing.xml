@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -14,7 +15,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
 
     <View
         android:id="@+id/shadowButton"
@@ -34,7 +36,7 @@
         app:layout_constraintVertical_bias="0.6"
         app:lottie_autoPlay="false"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/horse_run" />
+        app:lottie_rawRes="@raw/horse_run_1" />
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/horse2"
@@ -47,13 +49,13 @@
         app:layout_constraintVertical_bias="0.76"
         app:lottie_autoPlay="false"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/horse_run" />
+        app:lottie_rawRes="@raw/horse_run_2" />
 
     <LinearLayout
         android:id="@+id/buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
+        android:layout_marginHorizontal="@dimen/space_common_side"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
@@ -61,9 +63,9 @@
             style="@style/Widget.Button.GrayButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_medium"
             android:layout_weight="1"
-            android:text="Старт"
+            android:text="@string/racing_fragment_start_text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/restartButton"
             app:layout_constraintHorizontal_chainStyle="packed"
@@ -74,11 +76,11 @@
             style="@style/Widget.Button.GrayButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginStart="@dimen/spacing_medium"
+            android:layout_marginBottom="@dimen/spacing_medium"
             android:layout_weight="1"
             android:enabled="false"
-            android:text="Рестарт"
+            android:text="@string/racing_fragment_restart_text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/startButton" />
@@ -87,16 +89,16 @@
 
     <TextView
         android:id="@+id/winnerTextView"
+        style="@style/Headline_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/spacing_medium"
         android:shadowColor="@android:color/black"
         android:shadowDx="2"
         android:shadowDy="2"
         android:shadowRadius="2"
-        android:text="Ожидание гонки..."
+        android:text="@string/racing_fragment_status_waiting_start_text"
         android:textColor="@android:color/white"
-        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/horse1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
